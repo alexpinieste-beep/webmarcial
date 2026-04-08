@@ -116,7 +116,6 @@ export default async function LuchadoresPage() {
   }
 
   const fighters = await getFightersByGym(gym.id)
-  const isFreePlanFull = gym.subscription_tier === 'free' && fighters.length >= 5
 
   return (
     <div className="space-y-6">
@@ -128,36 +127,13 @@ export default async function LuchadoresPage() {
             Gestiona los luchadores de tu gimnasio
           </p>
         </div>
-        {isFreePlanFull ? (
-          <button
-            disabled
-            className="cursor-not-allowed rounded-md bg-[#27272a] px-4 py-2 text-sm font-medium text-[#71717a]"
-            title="Has alcanzado el límite del plan Free"
-          >
-            Añadir luchador
-          </button>
-        ) : (
-          <Link
-            href="/dashboard/luchadores/nuevo"
-            className="rounded-md bg-[#dc2626] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#b91c1c]"
-          >
-            Añadir luchador
-          </Link>
-        )}
+        <Link
+          href="/dashboard/luchadores/nuevo"
+          className="rounded-md bg-[#dc2626] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#b91c1c]"
+        >
+          Añadir luchador
+        </Link>
       </div>
-
-      {/* Free plan limit banner */}
-      {isFreePlanFull && (
-        <div className="rounded-lg border border-yellow-500/30 bg-yellow-900/20 p-4">
-          <p className="text-sm text-yellow-300">
-            Has alcanzado el límite del plan Free (5 luchadores).{' '}
-            <Link href="/dashboard/plan" className="font-semibold underline hover:text-yellow-200">
-              Mejora tu plan
-            </Link>{' '}
-            para añadir más.
-          </p>
-        </div>
-      )}
 
       {/* Empty state */}
       {fighters.length === 0 ? (

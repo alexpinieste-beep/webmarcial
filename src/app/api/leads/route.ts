@@ -58,6 +58,26 @@ export async function POST(request: Request) {
     )
   }
 
+  // 2b. Límite mensual para plan Basic (50 leads/mes)
+  if (gym.subscription_tier === 'basic') {
+    const monthStart = new Date()
+    monthStart.setDate(1)
+    monthStart.setHours(0, 0, 0, 0)
+
+    const { count: monthlyCount } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('gym_id', gym_id)
+      .gte('created_at', monthStart.toISOString())
+
+    if ((monthlyCount ?? 0) >= 50) {
+      return NextResponse.json(
+        { error: 'Este gimnasio ha alcanzado su límite de leads este mes.' },
+        { status: 429 }
+      )
+    }
+  }
+
   // 3. Rate limit: max 3 leads from the same email to the same gym in 24 hours
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { count, error: countError } = await supabase

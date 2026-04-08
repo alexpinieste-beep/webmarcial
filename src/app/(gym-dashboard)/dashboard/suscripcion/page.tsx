@@ -143,15 +143,16 @@ export default async function SuscripcionPage({
       'Luchadores ilimitados',
       'Formulario de leads (50/mes)',
       '10 fotos en galería',
-      'Analytics',
+      'Analytics básico',
+      '✦ Gratuito — sin tarjeta',
     ],
     pro: [
       'Perfil del gimnasio',
       'Luchadores ilimitados',
-      'Formulario de leads ilimitados',
+      'Leads ilimitados',
       '50 fotos en galería',
       'Badge "Destacado"',
-      'Analytics',
+      'Analytics avanzado',
       'Posición prioritaria en búsquedas',
     ],
   }
@@ -225,25 +226,15 @@ export default async function SuscripcionPage({
 
           {/* CTA buttons */}
           <div className="flex flex-col gap-2 sm:items-end">
-            {tier === 'free' && (
-              <>
-                <form action={createCheckoutSession.bind(null, 'basic')}>
-                  <button
-                    type="submit"
-                    className="w-full rounded-lg border border-[#1d4ed8]/40 bg-[#1e3a8a]/20 px-5 py-2.5 text-sm font-semibold text-[#93c5fd] transition-colors hover:bg-[#1e3a8a]/40 sm:w-auto"
-                  >
-                    Elegir Basic — €29/mes
-                  </button>
-                </form>
-                <form action={createCheckoutSession.bind(null, 'pro')}>
-                  <button
-                    type="submit"
-                    className="w-full rounded-lg bg-[#dc2626] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b91c1c] sm:w-auto"
-                  >
-                    Elegir Pro — €79/mes
-                  </button>
-                </form>
-              </>
+            {tier === 'basic' && (
+              <form action={createCheckoutSession.bind(null, 'pro')}>
+                <button
+                  type="submit"
+                  className="w-full rounded-lg bg-[#dc2626] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b91c1c] sm:w-auto"
+                >
+                  Mejorar a Pro — €79/mes
+                </button>
+              </form>
             )}
 
             {tier === 'basic' && (
@@ -349,42 +340,26 @@ export default async function SuscripcionPage({
         </div>
       </div>
 
-      {/* Upgrade CTAs below the table (only for free plan) */}
-      {tier === 'free' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-[#1d4ed8]/30 bg-[#1e3a8a]/10 p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-white">Basic</h3>
-              <span className="text-lg font-bold text-white">
-                €29<span className="text-sm font-normal text-[#71717a]">/mes</span>
-              </span>
+      {/* Upgrade CTA — solo para plan Basic */}
+      {tier === 'basic' && (
+        <div className="rounded-xl border border-[#dc2626]/30 bg-[#1c1212] p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-white">Hazte Pro</h3>
+              <p className="mt-0.5 text-sm text-[#71717a]">Leads ilimitados, badge Destacado y posición prioritaria</p>
             </div>
-            <form action={createCheckoutSession.bind(null, 'basic')}>
-              <button
-                type="submit"
-                className="w-full rounded-lg border border-[#1d4ed8]/50 bg-[#1e3a8a]/30 py-2.5 text-sm font-semibold text-[#93c5fd] transition-colors hover:bg-[#1e3a8a]/50"
-              >
-                Elegir Basic
-              </button>
-            </form>
+            <span className="text-lg font-bold text-white">
+              €79<span className="text-sm font-normal text-[#71717a]">/mes</span>
+            </span>
           </div>
-
-          <div className="rounded-xl border border-[#dc2626]/30 bg-[#1c1212] p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-white">Pro</h3>
-              <span className="text-lg font-bold text-white">
-                €79<span className="text-sm font-normal text-[#71717a]">/mes</span>
-              </span>
-            </div>
-            <form action={createCheckoutSession.bind(null, 'pro')}>
-              <button
-                type="submit"
-                className="w-full rounded-lg bg-[#dc2626] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b91c1c]"
-              >
-                Elegir Pro
-              </button>
-            </form>
-          </div>
+          <form action={createCheckoutSession.bind(null, 'pro')}>
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-[#dc2626] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b91c1c]"
+            >
+              Mejorar a Pro
+            </button>
+          </form>
         </div>
       )}
 

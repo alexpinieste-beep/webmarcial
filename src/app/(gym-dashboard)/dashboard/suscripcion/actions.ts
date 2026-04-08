@@ -7,7 +7,7 @@ import type { SubscriptionTier } from '@/lib/stripe'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
-export async function createCheckoutSession(tier: Exclude<SubscriptionTier, 'free'>) {
+export async function createCheckoutSession(tier: 'pro') {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
