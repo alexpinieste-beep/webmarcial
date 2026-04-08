@@ -20,6 +20,7 @@ const Facebook = Link2
 import { getGymBySlug, getGyms } from '@/lib/queries/gyms'
 import { getFightersByGym } from '@/lib/queries/fighters'
 import { getAllSports } from '@/lib/queries/sports'
+import LeadCaptureForm from '@/components/gyms/LeadCaptureForm'
 import { Badge } from '@/components/ui/Badge'
 import { FighterCard } from '@/components/cards/FighterCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
@@ -258,8 +259,8 @@ export default async function GymPage({
         )}
       </section>
 
-      {/* ── Lead Capture Form (Fase 3) ── */}
-      {gym.subscription_tier !== 'free' ? <LeadCaptureFormPlaceholder /> : null}
+      {/* ── Lead Capture Form ── */}
+      {gym.subscription_tier !== 'free' ? <LeadCaptureForm gymId={gym.id} gymName={gym.name} /> : null}
     </div>
   )
 }
