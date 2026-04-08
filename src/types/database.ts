@@ -52,6 +52,8 @@ export type Gym = {
   sport_ids: string[] | null
   subscription_tier: 'free' | 'basic' | 'pro'
   subscription_expires_at: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
   is_verified: boolean
   is_featured: boolean
   created_at: string
