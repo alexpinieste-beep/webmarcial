@@ -98,8 +98,24 @@ export default async function GymPage({
     .map((id) => sportMap.get(id))
     .filter(Boolean) as Sport[]
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsActivityLocation',
+    name: gym.name,
+    description: gym.description ?? undefined,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://webmarcial.com'}/gimnasios/${gym.slug}`,
+    ...(gym.address ? { address: { '@type': 'PostalAddress', streetAddress: gym.address, addressCountry: 'ES' } } : {}),
+    ...(gym.phone ? { telephone: gym.phone } : {}),
+    ...(gym.email ? { email: gym.email } : {}),
+    ...(gym.website ? { sameAs: gym.website } : {}),
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Hero ── */}
       <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-8 mb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">

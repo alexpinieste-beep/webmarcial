@@ -103,8 +103,41 @@ export default async function EventoDetailPage({ params }: { params: Params }) {
   const dateStr = formatFullDate(event.event_date)
   const timeStr = formatTime(event.event_date)
 
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://webmarcial.com'
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: event.title,
+    description: event.description ?? undefined,
+    url: `${BASE_URL}/eventos/${event.slug}`,
+    startDate: event.event_date,
+    eventStatus:
+      event.status === 'upcoming'
+        ? 'https://schema.org/EventScheduled'
+        : event.status === 'completed'
+        ? 'https://schema.org/EventCompleted'
+        : 'https://schema.org/EventCancelled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    ...(event.venue || event.zones
+      ? {
+          location: {
+            '@type': 'Place',
+            name: event.venue ?? event.zones?.name,
+            address: { '@type': 'PostalAddress', addressCountry: 'ES', addressRegion: event.zones?.name },
+          },
+        }
+      : {}),
+    ...(event.poster_url ? { image: event.poster_url } : {}),
+    ...(event.sports ? { sport: event.sports.name } : {}),
+    organizer: { '@type': 'Organization', name: 'WebMarcial', url: BASE_URL },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#0a0a0a]">
         {/* Background poster with dark overlay */}
