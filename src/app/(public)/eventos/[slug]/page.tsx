@@ -14,8 +14,17 @@ export const revalidate = 3600
 type Params = Promise<{ slug: string }>
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const slugs = await getUpcomingEventSlugs(20)
-  return slugs.map((slug: string) => ({ slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const now = new Date().toISOString()
+  const { data } = await supabase
+    .from('events')
+    .select('slug')
+    .eq('status', 'published')
+    .gte('event_date', now)
+    .order('event_date', { ascending: true })
+    .limit(20)
+  return (data ?? []).map((e: { slug: string }) => ({ slug: e.slug }))
 }
 
 export async function generateMetadata({

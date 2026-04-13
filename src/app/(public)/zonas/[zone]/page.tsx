@@ -12,8 +12,10 @@ import { EventCard } from '@/components/cards/EventCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 
 export async function generateStaticParams() {
-  const zones = await getAllZones()
-  return zones.map((z) => ({ zone: z.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase.from('zones').select('slug')
+  return (data ?? []).map((z: { slug: string }) => ({ zone: z.slug }))
 }
 
 export async function generateMetadata({

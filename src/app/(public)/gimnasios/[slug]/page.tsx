@@ -41,10 +41,14 @@ function LeadCaptureFormPlaceholder() {
 }
 
 export async function generateStaticParams() {
-  const gyms = await getGyms({ limit: 50 })
-  return gyms
-    .filter((g) => g.is_verified)
-    .map((g) => ({ slug: g.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase
+    .from('gyms')
+    .select('slug')
+    .eq('is_verified', true)
+    .limit(50)
+  return (data ?? []).map((g: { slug: string }) => ({ slug: g.slug }))
 }
 
 export async function generateMetadata({

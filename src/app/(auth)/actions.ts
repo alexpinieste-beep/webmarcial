@@ -70,6 +70,7 @@ export async function signUp(
   })
 
   if (error) {
+    console.error('[signUp error]', error.message, error.status)
     return { error: traducirError(error.message) }
   }
 

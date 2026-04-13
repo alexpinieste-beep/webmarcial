@@ -37,8 +37,14 @@ function getInitials(name: string): string {
 }
 
 export async function generateStaticParams() {
-  const fighters = await getTopFighters({ limit: 100 })
-  return fighters.map((f) => ({ slug: f.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase
+    .from('fighters')
+    .select('slug')
+    .eq('is_verified', true)
+    .limit(100)
+  return (data ?? []).map((f: { slug: string }) => ({ slug: f.slug }))
 }
 
 export async function generateMetadata({
