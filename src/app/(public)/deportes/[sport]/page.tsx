@@ -18,8 +18,10 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  const sports = await getAllSports()
-  return sports.map((s) => ({ sport: s.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase.from('sports').select('slug')
+  return (data ?? []).map((s) => ({ sport: s.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

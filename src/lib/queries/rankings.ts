@@ -6,6 +6,7 @@ export async function getRankings(params: {
   zone?: string
   weightClass?: string
   gender?: 'male' | 'female' | 'open'
+  level?: 'amateur' | 'professional'
 }): Promise<Ranking[]> {
   const supabase = await createClient()
 
@@ -19,7 +20,7 @@ export async function getRankings(params: {
 
   let query = supabase
     .from('rankings')
-    .select('*, fighters(id, name, slug, avatar_url, nationality, is_verified), weight_classes(*), zones(*)')
+    .select('*, fighters(id, name, slug, avatar_url, nationality, is_verified, level), weight_classes(*), zones(*)')
     .eq('sport_id', sport.id)
     .order('position', { ascending: true })
 
@@ -48,21 +49,6 @@ export async function getRankings(params: {
     }
   }
 
-  if (params.gender) {
-    // filter via weight_classes join — need a sub-query approach
-    // We join weight_classes and filter in-memory since PostgREST nested filter on joins is limited
-    const { data, error } = await query
-
-    if (error) {
-      console.error('getRankings error:', error)
-      return []
-    }
-
-    return (data ?? []).filter(
-      (r) => r.weight_classes?.gender === params.gender
-    ) as Ranking[]
-  }
-
   const { data, error } = await query
 
   if (error) {
@@ -70,7 +56,19 @@ export async function getRankings(params: {
     return []
   }
 
-  return data ?? []
+  let results = data ?? []
+
+  // Filter by gender via joined weight_classes
+  if (params.gender) {
+    results = results.filter((r) => r.weight_classes?.gender === params.gender)
+  }
+
+  // Filter by fighter level via joined fighters
+  if (params.level) {
+    results = results.filter((r) => r.fighters?.level === params.level)
+  }
+
+  return results as Ranking[]
 }
 
 export async function getWeightClassesBySport(

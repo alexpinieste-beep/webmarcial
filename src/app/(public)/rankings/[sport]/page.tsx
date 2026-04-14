@@ -12,12 +12,14 @@ export const revalidate = 1800
 
 type Props = {
   params: Promise<{ sport: string }>
-  searchParams: Promise<{ zona?: string; peso?: string; genero?: string }>
+  searchParams: Promise<{ zona?: string; peso?: string; genero?: string; nivel?: string }>
 }
 
 export async function generateStaticParams() {
-  const sports = await getAllSports()
-  return sports.map((s) => ({ sport: s.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase.from('sports').select('slug')
+  return (data ?? []).map((s: { slug: string }) => ({ sport: s.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RankingsSportPage({ params, searchParams }: Props) {
   const { sport: sportSlug } = await params
-  const { zona, peso, genero } = await searchParams
+  const { zona, peso, genero, nivel } = await searchParams
 
   const [sport, allSports, zones, weightClasses] = await Promise.all([
     getSportBySlug(sportSlug),
@@ -54,6 +56,7 @@ export default async function RankingsSportPage({ params, searchParams }: Props)
     zone: zona,
     weightClass: peso,
     gender: genero as 'male' | 'female' | 'open' | undefined,
+    level: nivel as 'amateur' | 'professional' | undefined,
   })
 
   const showZone = !zona
@@ -98,6 +101,7 @@ export default async function RankingsSportPage({ params, searchParams }: Props)
             currentZone={zona}
             currentWeightClass={peso}
             currentGender={genero}
+            currentLevel={nivel}
             sportSlug={sportSlug}
           />
         </div>
