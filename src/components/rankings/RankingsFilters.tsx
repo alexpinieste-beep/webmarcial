@@ -9,6 +9,7 @@ type Props = {
   currentZone?: string
   currentWeightClass?: string
   currentGender?: string
+  currentLevel?: string
   sportSlug: string
 }
 
@@ -18,6 +19,7 @@ export default function RankingsFilters({
   currentZone,
   currentWeightClass,
   currentGender,
+  currentLevel,
   sportSlug,
 }: Props) {
   const router = useRouter()
@@ -29,6 +31,7 @@ export default function RankingsFilters({
     if (key !== 'zona' && currentZone) params.set('zona', currentZone)
     if (key !== 'peso' && currentWeightClass) params.set('peso', currentWeightClass)
     if (key !== 'genero' && currentGender) params.set('genero', currentGender)
+    if (key !== 'nivel' && currentLevel) params.set('nivel', currentLevel)
 
     if (value) params.set(key, value)
 
@@ -40,7 +43,7 @@ export default function RankingsFilters({
     router.replace(pathname)
   }
 
-  const hasActiveFilters = !!(currentZone || currentWeightClass || currentGender)
+  const hasActiveFilters = !!(currentZone || currentWeightClass || currentGender || currentLevel)
 
   const selectClass =
     'w-full rounded-md border border-[#27272a] bg-[#18181b] px-3 py-2 text-sm text-gray-200 outline-none transition-colors focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626]'
@@ -111,6 +114,26 @@ export default function RankingsFilters({
           <option value="male">Masculino</option>
           <option value="female">Femenino</option>
           <option value="open">Open</option>
+        </select>
+      </div>
+
+      {/* Nivel */}
+      <div className="flex-1">
+        <label
+          htmlFor="filter-nivel"
+          className="mb-1 block text-xs font-medium text-gray-400"
+        >
+          Nivel
+        </label>
+        <select
+          id="filter-nivel"
+          className={selectClass}
+          value={currentLevel ?? ''}
+          onChange={(e) => updateFilter('nivel', e.target.value)}
+        >
+          <option value="">Amateur y profesional</option>
+          <option value="amateur">Amateur</option>
+          <option value="professional">Profesional</option>
         </select>
       </div>
 

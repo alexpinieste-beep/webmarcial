@@ -8,6 +8,7 @@ import type {
 
 export async function getTopFighters(params?: {
   sport?: string
+  level?: 'amateur' | 'professional'
   limit?: number
 }): Promise<Fighter[]> {
   const supabase = await createClient()
@@ -18,8 +19,11 @@ export async function getTopFighters(params?: {
     .order('name', { ascending: true })
     .limit(params?.limit ?? 12)
 
+  if (params?.level) {
+    query = query.eq('level', params.level)
+  }
+
   if (params?.sport) {
-    // filter by fighters who have a sport profile for this sport
     const { data: sport } = await supabase
       .from('sports')
       .select('id')
@@ -45,6 +49,54 @@ export async function getTopFighters(params?: {
 
   if (error) {
     console.error('getTopFighters error:', error)
+    return []
+  }
+
+  return data ?? []
+}
+
+export async function getAllFighters(params?: {
+  level?: 'amateur' | 'professional'
+  sport?: string
+  limit?: number
+}): Promise<Fighter[]> {
+  const supabase = await createClient()
+  let query = supabase
+    .from('fighters')
+    .select('*, gyms(id, name, slug, zones(id, name, slug))')
+    .eq('is_verified', true)
+    .order('name', { ascending: true })
+    .limit(params?.limit ?? 100)
+
+  if (params?.level) {
+    query = query.eq('level', params.level)
+  }
+
+  if (params?.sport) {
+    const { data: sport } = await supabase
+      .from('sports')
+      .select('id')
+      .eq('slug', params.sport)
+      .single()
+
+    if (sport) {
+      const { data: fighterIds } = await supabase
+        .from('fighter_sport_profiles')
+        .select('fighter_id')
+        .eq('sport_id', sport.id)
+
+      if (fighterIds && fighterIds.length > 0) {
+        query = query.in('id', fighterIds.map((r) => r.fighter_id))
+      } else {
+        return []
+      }
+    }
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('getAllFighters error:', error)
     return []
   }
 
@@ -85,9 +137,7 @@ export async function getFighterBySlug(slug: string): Promise<
       .eq('fighter_id', fighter.id),
     supabase
       .from('fighter_titles')
-      .select(
-        '*, titles(*, sports(*), weight_classes(*), zones(*))'
-      )
+      .select('*, titles(*, sports(*), weight_classes(*), zones(*))')
       .eq('fighter_id', fighter.id)
       .is('lost_at', null),
     supabase
@@ -119,4 +169,22 @@ export async function getFightersByGym(gymId: string): Promise<Fighter[]> {
   }
 
   return data ?? []
+}
+
+export async function getMyFighterProfile(userId: string): Promise<Fighter | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('fighters')
+    .select('*, gyms(id, name, slug, zones(*))')
+    .eq('owner_id', userId)
+    .single()
+
+  if (error) {
+    if (error.code !== 'PGRST116') {
+      console.error('getMyFighterProfile error:', error)
+    }
+    return null
+  }
+
+  return data
 }
