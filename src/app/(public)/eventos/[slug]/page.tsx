@@ -112,7 +112,7 @@ export default async function EventoDetailPage({ params }: { params: Params }) {
     url: `${BASE_URL}/eventos/${event.slug}`,
     startDate: event.event_date,
     eventStatus:
-      event.status === 'upcoming'
+      event.status === 'published'
         ? 'https://schema.org/EventScheduled'
         : event.status === 'completed'
         ? 'https://schema.org/EventCompleted'

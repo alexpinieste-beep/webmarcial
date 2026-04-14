@@ -65,12 +65,14 @@ export type Gym = {
 
 export type Fighter = {
   id: string
+  owner_id: string | null
   gym_id: string | null
   name: string
   slug: string
   bio: string | null
   avatar_url: string | null
   nationality: string
+  level: 'amateur' | 'professional'
   is_verified: boolean
   created_at: string
   updated_at: string

@@ -1,15 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import {
-  LayoutDashboard,
-  Building2,
-  Users,
-  BarChart2,
-  CalendarDays,
-  Trophy,
-  LogOut,
-  ShieldCheck,
-} from 'lucide-react'
+import { User, BarChart2, Trophy, LogOut, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardNav, type NavItem } from '@/components/dashboard/DashboardNav'
 import { MobileSidebarToggle } from '@/components/dashboard/MobileSidebarToggle'
@@ -21,7 +12,7 @@ async function signOut() {
   redirect('/login')
 }
 
-export default async function AdminLayout({
+export default async function FighterDashboardLayout({
   children,
 }: {
   children: React.ReactNode
@@ -32,24 +23,43 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (!user) {
+    redirect('/login')
+  }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
+  const { data: fighter } = await supabase
+    .from('fighters')
+    .select('id, name, slug, level, is_verified')
+    .eq('owner_id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/dashboard')
+  if (!fighter) {
+    redirect('/registro-luchador')
+  }
 
   const navItems: NavItem[] = [
-    { href: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} /> },
-    { href: '/admin/gimnasios', label: 'Gimnasios', icon: <Building2 size={18} /> },
-    { href: '/admin/peleadores', label: 'Peleadores', icon: <Users size={18} /> },
-    { href: '/admin/rankings', label: 'Rankings', icon: <BarChart2 size={18} /> },
-    { href: '/admin/eventos', label: 'Eventos', icon: <CalendarDays size={18} /> },
-    { href: '/admin/titulos', label: 'Títulos', icon: <Trophy size={18} /> },
+    {
+      href: '/dashboard/luchador/perfil',
+      label: 'Mi Perfil',
+      icon: <User size={18} />,
+    },
+    {
+      href: '/dashboard/luchador/estadisticas',
+      label: 'Estadísticas',
+      icon: <BarChart2 size={18} />,
+    },
+    {
+      href: '/dashboard/luchador/titulos',
+      label: 'Títulos',
+      icon: <Trophy size={18} />,
+    },
   ]
+
+  const levelLabel = fighter.level === 'professional' ? 'Profesional' : 'Amateur'
+  const levelStyle =
+    fighter.level === 'professional'
+      ? 'bg-[#3b1a1a] text-[#fca5a5]'
+      : 'bg-[#1a2a1a] text-[#86efac]'
 
   return (
     <div className="flex min-h-screen bg-[#0a0a0a]">
@@ -63,29 +73,39 @@ export default async function AdminLayout({
           </a>
         </div>
 
-        {/* Admin badge */}
+        {/* Fighter info */}
         <div className="border-b border-[#27272a] px-5 py-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={14} className="text-[#dc2626]" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#dc2626]">
-              Administración
+          <p className="truncate text-sm font-semibold text-white" title={fighter.name}>
+            {fighter.name}
+          </p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span
+              className={`inline-block rounded px-2 py-0.5 text-xs font-medium uppercase tracking-wide ${levelStyle}`}
+            >
+              {levelLabel}
             </span>
+            {fighter.is_verified && (
+              <span className="text-xs text-[#52525b]">✓ Verificado</span>
+            )}
           </div>
-          <p className="mt-1 truncate text-xs text-[#52525b]">{user.email}</p>
         </div>
 
-        {/* Nav */}
+        {/* Navigation */}
         <div className="flex-1 overflow-y-auto px-3 py-5">
+          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-[#52525b]">
+            Panel del luchador
+          </p>
           <DashboardNav items={navItems} />
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#27272a] px-5 py-4 space-y-3">
+        <div className="space-y-3 border-t border-[#27272a] px-5 py-4">
           <Link
-            href="/"
+            href={`/luchadores/${fighter.slug}`}
             className="flex items-center gap-2 text-xs text-[#71717a] transition-colors hover:text-white"
           >
-            Ver sitio público
+            <ExternalLink size={14} />
+            Ver perfil público
           </Link>
           <form action={signOut}>
             <button
@@ -102,13 +122,13 @@ export default async function AdminLayout({
       {/* Right side */}
       <div className="flex flex-1 flex-col min-w-0">
         <MobileSidebarToggle
-          gymName="Panel Admin"
-          gymSlug="/"
-          planBadge="Admin"
+          gymName={fighter.name}
+          gymSlug={`/luchadores/${fighter.slug}`}
+          planBadge={levelLabel}
           navItems={navItems}
           signOutAction={signOut}
         />
-        <main className="flex-1 p-5 lg:p-7">{children}</main>
+        <main className="flex-1 p-5 lg:p-6">{children}</main>
       </div>
     </div>
   )
