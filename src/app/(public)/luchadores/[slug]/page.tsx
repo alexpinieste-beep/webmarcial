@@ -37,8 +37,14 @@ function getInitials(name: string): string {
 }
 
 export async function generateStaticParams() {
-  const fighters = await getTopFighters({ limit: 100 })
-  return fighters.map((f) => ({ slug: f.slug }))
+  const { createStaticClient } = await import('@/lib/supabase/static')
+  const supabase = createStaticClient()
+  const { data } = await supabase
+    .from('fighters')
+    .select('slug')
+    .eq('is_verified', true)
+    .limit(100)
+  return (data ?? []).map((f: { slug: string }) => ({ slug: f.slug }))
 }
 
 export async function generateMetadata({
@@ -90,8 +96,23 @@ export default async function FighterPage({
   const flag = nationalityFlag[fighter.nationality] ?? ''
   const initials = getInitials(fighter.name)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: fighter.name,
+    description: fighter.bio ?? undefined,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://webmarcial.com'}/luchadores/${fighter.slug}`,
+    ...(fighter.avatar_url ? { image: fighter.avatar_url } : {}),
+    ...(fighter.nationality ? { nationality: fighter.nationality } : {}),
+    ...(fighter.gyms ? { affiliation: { '@type': 'SportsOrganization', name: fighter.gyms.name } } : {}),
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Hero ── */}
       <div className="mb-8 rounded-2xl border border-zinc-800 bg-[#18181b] p-8">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
