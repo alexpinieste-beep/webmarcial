@@ -86,7 +86,7 @@ export default async function GymPage({
     getAllSports(),
   ])
 
-  if (!gym || !gym.is_verified) {
+  if (!gym) {
     notFound()
   }
 
@@ -116,6 +116,13 @@ export default async function GymPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* ── Unverified banner ── */}
+      {!gym.is_verified && (
+        <div className="mb-6 rounded-lg border border-amber-800/40 bg-amber-950/30 px-5 py-3 text-sm text-amber-400">
+          Este gimnasio está pendiente de verificación por el equipo de WebMarcial.
+        </div>
+      )}
+
       {/* ── Hero ── */}
       <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-8 mb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
