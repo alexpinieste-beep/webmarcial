@@ -47,13 +47,13 @@ export default async function GymDashboardLayout({
     redirect('/login')
   }
 
-  const { data: gym } = await supabase
-    .from('gyms')
-    .select('*, zones(*)')
-    .eq('owner_id', user.id)
-    .single()
+  const [{ data: gym }, { data: profile }] = await Promise.all([
+    supabase.from('gyms').select('*, zones(*)').eq('owner_id', user.id).single(),
+    supabase.from('profiles').select('role').eq('id', user.id).single(),
+  ])
 
   if (!gym) {
+    if (profile?.role === 'admin') redirect('/admin')
     redirect('/registro-gimnasio')
   }
 
