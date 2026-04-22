@@ -90,6 +90,35 @@ export default async function GymPage({
     notFound()
   }
 
+  // Unverified gyms: only the owner (logged-in) can reach this point via
+  // gym_owner_select_own_gym RLS policy. Show a pending-verification screen
+  // instead of the full public profile.
+  if (!gym.is_verified) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6 text-center">
+        <div className="rounded-2xl border border-amber-800/40 bg-amber-950/20 p-10">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-900/40">
+            <CheckCircle size={32} className="text-amber-500" />
+          </div>
+          <h1 className="mb-2 text-2xl font-bold text-white">{gym.name}</h1>
+          <p className="mb-1 text-sm font-medium text-amber-400 uppercase tracking-wider">
+            Pendiente de verificación
+          </p>
+          <p className="mt-4 text-sm text-zinc-400 leading-relaxed">
+            Tu gimnasio está en revisión por el equipo de WebMarcial. Una vez verificado,
+            tu perfil público será visible para todos los usuarios.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-6 inline-block rounded-lg bg-[#dc2626] px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+          >
+            Volver al panel
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const fighters = await getFightersByGym(gym.id)
 
   // Resolve sport names from IDs
@@ -116,12 +145,6 @@ export default async function GymPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* ── Unverified banner ── */}
-      {!gym.is_verified && (
-        <div className="mb-6 rounded-lg border border-amber-800/40 bg-amber-950/30 px-5 py-3 text-sm text-amber-400">
-          Este gimnasio está pendiente de verificación por el equipo de WebMarcial.
-        </div>
-      )}
 
       {/* ── Hero ── */}
       <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-8 mb-8">
